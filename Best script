@@ -1,0 +1,205 @@
+-- Remove qualquer tela antiga do script
+if game.CoreGui:FindFirstChild("PedidoDesculpasUI") then
+    game.CoreGui.PedidoDesculpasUI:Destroy()
+end
+
+-- 1. Criando a ScreenGui Principal
+local sg = Instance.new("ScreenGui")
+sg.Name = "PedidoDesculpasUI"
+sg.ResetOnSpawn = false
+sg.IgnoreGuiInset = true
+sg.Parent = game.CoreGui
+
+-- Fundo Roxo Escuro / Preto
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(15, 10, 25)
+background.BorderSizePixel = 0
+background.Parent = sg
+
+-- Container para as Partículas
+local particleHolder = Instance.new("Frame")
+particleHolder.Size = UDim2.new(1, 0, 1, 0)
+particleHolder.BackgroundTransparency = 1
+particleHolder.Parent = background
+
+-- 2. Partículas Flutuantes
+local particles = {}
+for i = 1, 45 do
+    local p = Instance.new("Frame")
+    p.Size = UDim2.new(0, math.random(3, 6), 0, math.random(3, 6))
+    p.Position = UDim2.new(math.random(), 0, math.random(), 0)
+    p.BackgroundColor3 = Color3.fromRGB(200, 150, 255)
+    p.BackgroundTransparency = math.random(3, 7) / 10
+    p.BorderSizePixel = 0
+    p.Parent = particleHolder
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = p
+    
+    table.insert(particles, {
+        frame = p,
+        speedX = (math.random() - 0.5) * 0.0015,
+        speedY = (math.random() - 0.5) * 0.0015
+    })
+end
+
+-- Animação das Partículas
+task.spawn(function()
+    while task.wait(0.03) do
+        for _, pData in ipairs(particles) do
+            local p = pData.frame
+            local newX = p.Position.X.Scale + pData.speedX
+            local newY = p.Position.Y.Scale + pData.speedY
+            
+            if newX < 0 then newX = 1 elseif newX > 1 then newX = 0 end
+            if newY < 0 then newY = 1 elseif newY > 1 then newY = 0 end
+            
+            p.Position = UDim2.new(newX, 0, newY, 0)
+        end
+    end
+end)
+
+-- 3. Sons
+local typeSound = Instance.new("Sound")
+typeSound.SoundId = "rbxassetid://9114223178"
+typeSound.Volume = 0.5
+typeSound.Parent = sg
+
+local successSound = Instance.new("Sound")
+successSound.SoundId = "rbxassetid://1837849618"
+successSound.Volume = 1
+successSound.Parent = sg
+
+local errorSound = Instance.new("Sound")
+errorSound.SoundId = "rbxassetid://1837852331"
+errorSound.Volume = 1
+errorSound.Parent = sg
+
+-- 4. Caixa Principal
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 480, 0, 240)
+mainFrame.Position = UDim2.new(0.5, -240, 0.5, -120)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 18, 40)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = background
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 14)
+mainCorner.Parent = mainFrame
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(138, 43, 228)
+stroke.Thickness = 2
+stroke.Parent = mainFrame
+
+-- Texto Digitado
+local textLabel = Instance.new("TextLabel")
+textLabel.Size = UDim2.new(1, -40, 0, 60)
+textLabel.Position = UDim2.new(0, 20, 0, 15)
+textLabel.BackgroundTransparency = 1
+textLabel.TextColor3 = Color3.fromRGB(230, 230, 250)
+textLabel.TextSize = 18
+textLabel.Font = Enum.Font.FredokaOne
+textLabel.TextWrapped = true
+textLabel.TextXAlignment = Enum.TextXAlignment.Center
+textLabel.Text = ""
+textLabel.Parent = mainFrame
+
+-- Container de Entrada (Caixa de Texto + Botão)
+local inputContainer = Instance.new("Frame")
+inputContainer.Size = UDim2.new(1, -40, 0, 45)
+inputContainer.Position = UDim2.new(0, 20, 1, -75)
+inputContainer.BackgroundTransparency = 1
+inputContainer.Visible = false
+inputContainer.Parent = mainFrame
+
+-- Caixa de Entrada de Texto (TextBox)
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(0.7, -10, 1, 0)
+textBox.Position = UDim2.new(0, 0, 0, 0)
+textBox.BackgroundColor3 = Color3.fromRGB(45, 30, 70)
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.PlaceholderColor3 = Color3.fromRGB(180, 150, 210)
+textBox.PlaceholderText = "Digite a senha..."
+textBox.TextSize = 16
+textBox.Font = Enum.Font.FredokaOne
+textBox.ClearTextOnFocus = false
+textBox.Text = ""
+textBox.Parent = inputContainer
+
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 10)
+boxCorner.Parent = textBox
+
+local boxStroke = Instance.new("UIStroke")
+boxStroke.Color = Color3.fromRGB(160, 80, 250)
+boxStroke.Thickness = 1.5
+boxStroke.Parent = textBox
+
+-- Botão Executar
+local btnExecutar = Instance.new("TextButton")
+btnExecutar.Size = UDim2.new(0.3, 0, 1, 0)
+btnExecutar.Position = UDim2.new(0.7, 5, 0, 0)
+btnExecutar.BackgroundColor3 = Color3.fromRGB(138, 43, 228)
+btnExecutar.Text = "Executar"
+btnExecutar.TextColor3 = Color3.fromRGB(255, 255, 255)
+btnExecutar.TextSize = 16
+btnExecutar.Font = Enum.Font.FredokaOne
+btnExecutar.Parent = inputContainer
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 10)
+btnCorner.Parent = btnExecutar
+
+-- Label de Resposta (Feedback)
+local finalLabel = Instance.new("TextLabel")
+finalLabel.Size = UDim2.new(1, -40, 0, 30)
+finalLabel.Position = UDim2.new(0, 20, 1, -30)
+finalLabel.BackgroundTransparency = 1
+finalLabel.TextSize = 15
+finalLabel.Font = Enum.Font.FredokaOne
+finalLabel.TextWrapped = true
+finalLabel.Visible = false
+finalLabel.Parent = mainFrame
+
+-- Efeito Digitação
+local mensagem = "ATENÇÃO: Esse script é privado. Para executar, digite a senha e clique no botão."
+
+task.spawn(function()
+    task.wait(0.5)
+    for i = 1, #mensagem do
+        textLabel.Text = string.sub(mensagem, 1, i)
+        typeSound:Play()
+        task.wait(0.04)
+    end
+    inputContainer.Visible = true
+end)
+
+-- Clique no Botão Executar
+btnExecutar.MouseButton1Click:Connect(function()
+    local senhaInformada = textBox.Text
+    
+    if senhaInformada == "cafezinlindokkj" then
+        inputContainer.Visible = false
+        successSound:Play()
+        finalLabel.TextColor3 = Color3.fromRGB(170, 100, 255)
+        finalLabel.Text = "Senha correta! Executando script..."
+        finalLabel.Visible = true
+        
+        task.wait(1.5)
+        sg:Destroy()
+        
+        -- Executa o script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/trakishub/Vortexhub/refs/heads/main/Brookhaven"))()
+    else
+        errorSound:Play()
+        finalLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+        finalLabel.Text = "A senha está incorreta tente novamente"
+        finalLabel.Visible = true
+        
+        task.wait(2.5)
+        finalLabel.Visible = false
+    end
+end)
